@@ -1,23 +1,77 @@
-import React from 'react';
-import { FaGithubAlt, FaPlus } from 'react-icons/fa';
+import React, { Component } from 'react';
+import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 
-import { Container, Form, SubmitButton } from './styles';
+import api from '../../services/api';
+import { Container, Form, SubmitButton, List } from './styles';
 
-function Main() {
-  return (
-    <Container>
-      <h1>
-        <FaGithubAlt />
-        Repositórios
-      </h1>
-      <Form onSubmit={() => {}}>
-        <input type="text" placeholder="Adicionar Repositório" />
-        <SubmitButton disabled>
-          <FaPlus color="#FFF" size={14} />
-        </SubmitButton>
-      </Form>
-    </Container>
-  );
+class Main extends Component {
+  constructor() {
+    super();
+    this.state = {
+      newRepository: '',
+      repositories: [],
+      loading: false,
+    };
+  }
+
+  handleInputChange = (e) => {
+    this.setState({ newRepository: e.target.value });
+  };
+
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    const { newRepository, repositories } = this.state;
+
+    this.setState({ loading: true });
+
+    const response = await api.get(`repos/${newRepository}`);
+
+    const data = {
+      name: response.data.full_name,
+    };
+
+    this.setState({
+      repositories: [...repositories, data],
+      newRepository: '',
+      loading: false,
+    });
+  };
+
+  render() {
+    const { newRepository, loading, repositories } = this.state;
+    return (
+      <Container>
+        <h1>
+          <FaGithubAlt />
+          Repositórios
+        </h1>
+        <Form onSubmit={this.handleSubmit}>
+          <input
+            type="text"
+            placeholder="Adicionar Repositório"
+            value={newRepository}
+            onChange={this.handleInputChange}
+          />
+          <SubmitButton loading={loading}>
+            {loading ? (
+              <FaSpinner color="#fff" size={14} />
+            ) : (
+              <FaPlus color="#FFF" size={14} />
+            )}
+          </SubmitButton>
+        </Form>
+
+        <List>
+          {repositories.map((repository) => (
+            <li key={repository.name}>
+              <span>{repository.name}</span>
+              <a href="http://google.com">Detalhes</a>
+            </li>
+          ))}
+        </List>
+      </Container>
+    );
+  }
 }
 
 export default Main;
