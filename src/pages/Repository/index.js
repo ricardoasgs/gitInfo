@@ -24,7 +24,7 @@ class Repository extends Component {
 
     const [repository, issues] = await Promise.all([
       api.get(`repos/${repositoryName}`),
-      api.get(`repos/${repositoryName}`, {
+      api.get(`repos/${repositoryName}/issues`, {
         params: {
           state: 'open',
           per_page: 5,
@@ -41,7 +41,6 @@ class Repository extends Component {
 
   render() {
     const { repository, issues, loading } = this.state;
-    console.log(issues);
     if (loading) {
       return <Loading>carregando</Loading>;
     }
@@ -60,6 +59,9 @@ class Repository extends Component {
               <div>
                 <strong>
                   <a href={issue.html_url}>{issue.title}</a>
+                  {issue.labels.map((label) => (
+                    <span key={String(label.id)}>{label.name}</span>
+                  ))}
                 </strong>
               </div>
             </li>
